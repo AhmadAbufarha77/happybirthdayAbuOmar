@@ -68,6 +68,7 @@ requestAnimationFrame(frame);
 
 /* ---------- Flow ---------- */
 $('#start').onclick=async()=>{A();$('#mute').hidden=false;sfx.chime();show('count');
+  [msg,song,vid].forEach(m=>{const was=m.muted;m.muted=true;m.play().then(()=>{m.pause();m.currentTime=0;m.muted=was}).catch(()=>{m.muted=was})});
   for(const n of [3,2,1]){const el=$('#num');el.textContent=n;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');sfx.tick();await wait(600)}
   hero()};
 
@@ -99,10 +100,13 @@ function animateWave(on){clearInterval(waveT);const b=[...wave.children];
 function gallery(){
   show('gallery');$('#prog').style.width='0';
   msg.playbackRate=CONFIG.audioSpeed;msg.preservesPitch=true;
-  vid.muted=false;vid.volume=.2;vid.loop=true;vid.currentTime=0;
-  setTimeout(()=>{
+  vid.muted=false;vid.volume=.12;vid.loop=true;vid.currentTime=0;
+  const go=()=>{
     vid.play().catch(()=>{vid.muted=true;vid.play()});
     msg.currentTime=0;msg.play().then(()=>{duck(true);animateWave(true)}).catch(()=>{});
+  };
+  setTimeout(()=>{go();
+    setTimeout(()=>{if(msg.paused&&!msg.ended)addEventListener('pointerdown',go,{once:true})},600);
   },900);
 }
 msg.addEventListener('timeupdate',()=>{if(msg.duration)$('#prog').style.width=(msg.currentTime/msg.duration*100)+'%'});
