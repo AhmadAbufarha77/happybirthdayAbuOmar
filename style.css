@@ -1,0 +1,57 @@
+:root{--ink:#120f2b;--ink2:#221a4d;--saf:#ffb703;--rose:#ff5d8f;--mint:#7ae7c7;--paper:#fff6e5;
+--f1:'Reem Kufi','Tajawal',system-ui,sans-serif;--f2:'Tajawal',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,var(--ink2),var(--ink) 65%);color:var(--paper);font-family:var(--f2)}
+canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#fx{z-index:50}
+.scene{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;padding:1.5rem;text-align:center;opacity:0;visibility:hidden;transition:opacity .8s,visibility .8s}
+.scene.on{opacity:1;visibility:visible}
+h1,h2{font-family:var(--f1);font-weight:700;line-height:1.15}
+.kicker{font-size:1.1rem;color:var(--mint)}
+.btn{font:700 1.1rem var(--f2);padding:.85rem 2.2rem;border:0;border-radius:99px;background:var(--saf);color:var(--ink);cursor:pointer;box-shadow:0 8px 30px #ffb70355;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 12px 40px #ffb70388}
+.btn.ghost{background:transparent;color:var(--paper);border:2px solid var(--paper);box-shadow:none}
+:focus-visible{outline:3px solid var(--mint);outline-offset:3px}
+#mute{position:fixed;top:max(14px,env(safe-area-inset-top));left:14px;z-index:60;width:44px;height:44px;border-radius:50%;border:0;background:#ffffff1f;color:#fff;font-size:1.2rem;cursor:pointer;backdrop-filter:blur(6px)}
+
+/* gate */
+#gate h1{font-size:clamp(2rem,8vw,3.6rem)}
+#gate p{opacity:.8}
+.gift{position:relative;width:120px;height:120px;animation:shake 2.4s infinite}
+.gift i{position:absolute;display:block}
+.gift .box{bottom:0;left:8px;right:8px;height:70px;background:var(--rose);border-radius:6px}
+.gift .lid{top:22px;left:0;right:0;height:32px;background:#ff7fa8;border-radius:6px;z-index:2}
+.gift .rib{left:50%;width:22px;margin-left:-11px;top:22px;bottom:0;background:var(--saf);z-index:3}
+@keyframes shake{0%,70%,100%{transform:rotate(0)}75%{transform:rotate(-8deg)}80%{transform:rotate(8deg)}85%{transform:rotate(-6deg)}90%{transform:rotate(5deg)}}
+
+/* count */
+#num{font:700 clamp(9rem,45vw,20rem)/1 var(--f1);color:var(--saf);text-shadow:0 0 60px #ffb70388}
+#num.pop{animation:pop .9s ease-out}
+@keyframes pop{0%{transform:scale(.2);opacity:0}30%{transform:scale(1.15);opacity:1}100%{transform:scale(.9);opacity:.2}}
+
+/* hero */
+#hero h2{font-size:clamp(1.6rem,6vw,2.6rem);color:var(--saf);opacity:0;transform:translateY(20px);transition:all 0.6s .1s}
+#hero .kicker{opacity:0;transition:opacity 1s}
+#hero.go .kicker,#hero.go h2{opacity:1;transform:none}
+.name{font-size:clamp(3.4rem,17vw,9rem);display:flex;flex-wrap:wrap;justify-content:center;gap:0 .05em;text-shadow:0 6px 40px #ff5d8f88}
+.name span{display:inline-block;opacity:0;transform:translateY(80px) rotate(12deg) scale(.6);animation:letter .9s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes letter{to{opacity:1;transform:none}}
+.sub{font-size:1.2rem;opacity:0;transition:opacity 1s}
+.sub.on{opacity:.9}
+.balloons{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.b{position:absolute;bottom:-160px;width:58px;height:74px;border-radius:50% 50% 48% 48%;animation:rise linear infinite}
+.b:after{content:"";position:absolute;top:100%;left:50%;width:2px;height:70px;background:#ffffff66}
+@keyframes rise{to{transform:translate(var(--dx),-125vh) rotate(var(--rot))}}
+
+/* video */
+#vid{display:block;max-width:min(88vw,760px);max-height:58vh;border-radius:16px;background:#000;box-shadow:0 20px 60px #000a,0 0 0 6px #fff6e5}
+.prog{width:min(80vw,420px);height:4px;border-radius:4px;background:#ffffff26;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--saf)}
+.wave{height:56px}
+.wave i{width:6px;height:10px;border-radius:4px;background:linear-gradient(var(--mint),var(--saf));transition:height .12s}
+
+/* end */
+#end h2{font-size:clamp(2.2rem,9vw,4.4rem);color:var(--saf)}
+.long{max-width:34ch;font-size:1.25rem;line-height:1.9}
+
+@media (prefers-reduced-motion:reduce){.gift,.b{animation:none}}

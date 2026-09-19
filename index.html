@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مفاجأة عيد ميلاد 🎂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bg"></canvas>
+<canvas id="fx"></canvas>
+<button id="mute" aria-label="كتم الصوت" hidden>🔊</button>
+
+<section class="scene on" id="gate">
+  <div class="gift" aria-hidden="true"><i class="lid"></i><i class="box"></i><i class="rib"></i></div>
+  <h1>في مفاجأة إلك</h1>
+  <p>شغّل الصوت، وجهّز حالك</p>
+  <button class="btn" id="start">افتح المفاجأة</button>
+</section>
+
+<section class="scene" id="count"><div id="num"></div></section>
+
+<section class="scene" id="hero">
+  <div class="balloons" id="balloons" aria-hidden="true"></div>
+  <p class="kicker" id="kick">اليوم إلك</p>
+  <h2 id="wish">عيد ميلاد سعيد</h2>
+  <h1 class="name" id="name" aria-label=""></h1>
+  <p class="sub" id="sub"></p>
+  </section>
+
+<section class="scene" id="gallery">
+  <p class="kicker">لحظات ما بتننسى</p>
+  <!-- 👇 حط الفيديو هون: assets/video.mp4 -->
+<video id="vid" src="assets/IMG_2254.MOV" loop playsinline preload="auto"></video>  <div class="wave" id="wave" aria-hidden="true"></div>
+  <div class="prog"><i id="prog"></i></div>
+  <audio id="msg" src="assets/voice_loud.mp3" preload="auto"></audio>
+  <audio id="song" src="assets/song.mp3" preload="auto" loop></audio>
+</section>
+
+<section class="scene" id="end">
+  <h2 id="endTitle"></h2>
+  <p class="long" id="endText"></p>
+  <button class="btn" id="replay">من الأول</button>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
