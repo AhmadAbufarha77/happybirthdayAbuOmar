@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>مفاجأة عيد ميلاد 🎂</title>
+<title>happy birthday 🎂</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
@@ -35,8 +35,11 @@
 <section class="scene" id="gallery">
   <p class="kicker">لحظات ما بتننسى</p>
   <!-- 👇 حط الفيديو هون: assets/video.mp4 -->
-<video id="vid" src="assets/IMG_2254.MOV" loop playsinline preload="auto"></video>  <div class="wave" id="wave" aria-hidden="true"></div>
+  <video id="vid" src="assets/IMG_2254.MOV" loop playsinline preload="auto"></video>
+  <div class="wave" id="wave" aria-hidden="true"></div>
   <div class="prog"><i id="prog"></i></div>
+  <button class="btn" id="tapPlay" hidden>▶ اضغط لتشغيل الصوت</button>
+  <p id="dbg"></p>
   <audio id="msg" src="assets/voice_loud.mp3" preload="auto"></audio>
   <audio id="song" src="assets/song.mp3" preload="auto" loop></audio>
 </section>

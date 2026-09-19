@@ -1,8 +1,9 @@
 /* ===== إعدادات: عدّل هون ===== */
 const CONFIG={
-  name:'ابو العمر',          // ← اكتب الاسم
+  name:'أحمد عمر',          // ← اكتب الاسم
   sub:'كل عام وإنت أحلى وأغلى إشي',
-  audioSpeed:1.1,              // سرعة الصوت (1 = عادي، 1.1 = أسرع شوي)
+  audioSpeed:1.1,
+  videoVolume:.12,             // صوت الفيديو الأصلي (0 - 1)              // سرعة الصوت (1 = عادي، 1.1 = أسرع شوي)
   endTitle:'كل عام وإنت بخير',
   endText:'الله يخليك إلنا، ويجعل سنتك الجاية كلها فرح وإنجازات. حبينا نفاجئك لأنك تستاهل كل خير.'
 };
@@ -40,6 +41,7 @@ function melody(){ // Happy Birthday (music box)
   let t=0;s.forEach(([n,d])=>{tone(N[n],1.1,'triangle',.16,t,0,music);tone(N[n]*2,.6,'sine',.05,t,0,music);t+=d*.42});
 }
 $('#mute').onclick=e=>{muted=!muted;master&&(master.gain.value=muted?0:.8);$('#msg').muted=muted;$('#song').muted=muted;$('#vid').muted=muted;e.target.textContent=muted?'🔇':'🔊'};
+
 /* ---------- Scenes ---------- */
 function show(id){document.querySelectorAll('.scene').forEach(s=>s.classList.toggle('on',s.id===id))}
 
@@ -67,15 +69,16 @@ function frame(t){
 requestAnimationFrame(frame);
 
 /* ---------- Flow ---------- */
-$('#start').onclick=async()=>{A();$('#mute').hidden=false;sfx.chime();show('count');
-  [msg,song,vid].forEach(m=>{const was=m.muted;m.muted=true;m.play().then(()=>{m.pause();m.currentTime=0;m.muted=was}).catch(()=>{m.muted=was})});
+$('#start').onclick=async()=>{A();try{navigator.audioSession.type='playback'}catch(e){}routeVideo();
+  [msg,song,vid].forEach(m=>{const was=m.muted;m.muted=true;m.play().then(()=>{m.pause();m.currentTime=0;m.muted=was}).catch(()=>{m.muted=was})});$('#mute').hidden=false;sfx.chime();show('count');
   for(const n of [3,2,1]){const el=$('#num');el.textContent=n;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');sfx.tick();await wait(600)}
   hero()};
 
 function hero(){
   show('hero');sfx.pop();sfx.chime();confetti(220);setTimeout(()=>confetti(120,W*.2,H*.6),350);setTimeout(()=>confetti(120,W*.8,H*.6),500);
   const n=$('#name');n.innerHTML='';n.setAttribute('aria-label',CONFIG.name);
-  CONFIG.name.split(' ').forEach((w,i)=>{const s=document.createElement('span');s.textContent=w;s.style.animationDelay=(.4+i*.35)+'s';n.appendChild(s);setTimeout(()=>{sfx.pop();confetti(90,W/2,H*.5)},400+i*350)});  $('#sub').textContent=CONFIG.sub;$('#hero').classList.add('go');
+  CONFIG.name.split(' ').forEach((w,i)=>{const s=document.createElement('span');s.textContent=w;s.style.animationDelay=(.4+i*.35)+'s';n.appendChild(s);setTimeout(()=>{sfx.pop();confetti(90,W/2,H*.5)},400+i*350)});
+  $('#sub').textContent=CONFIG.sub;$('#hero').classList.add('go');
   const bl=$('#balloons');bl.innerHTML='';
   for(let i=0;i<14;i++){const b=document.createElement('i');b.className='b';b.style.cssText=`left:${Math.random()*95}%;background:${COL[i%COL.length]};--dx:${Math.random()*120-60}px;--rot:${Math.random()*30-15}deg;animation-duration:${7+Math.random()*7}s;animation-delay:${Math.random()*5}s;opacity:.85`;bl.appendChild(b)}
   startMusic();
@@ -97,18 +100,23 @@ for(let i=0;i<32;i++)wave.appendChild(document.createElement('i'));
 function animateWave(on){clearInterval(waveT);const b=[...wave.children];
   if(!on){b.forEach(x=>x.style.height='8px');return}
   waveT=setInterval(()=>b.forEach((x,i)=>x.style.height=(8+Math.abs(Math.sin(Date.now()/180+i*.5))*Math.random()*46)+'px'),120)}
+let started=false,vidGain;
+function routeVideo(){ // volume control that also works on iPhone (only on http/https)
+  if(vidGain||!/^https?:/.test(location.protocol))return;
+  try{const c=A(),s=c.createMediaElementSource(vid);vidGain=c.createGain();vidGain.gain.value=CONFIG.videoVolume;s.connect(vidGain).connect(master)}catch(e){vidGain=null}}
 function gallery(){
-  show('gallery');$('#prog').style.width='0';
+  show('gallery');$('#prog').style.width='0';started=false;
   msg.playbackRate=CONFIG.audioSpeed;msg.preservesPitch=true;
-  vid.muted=false;vid.volume=.12;vid.loop=true;vid.currentTime=0;
-  const go=()=>{
-    vid.play().catch(()=>{vid.muted=true;vid.play()});
-    msg.currentTime=0;msg.play().then(()=>{duck(true);animateWave(true)}).catch(()=>{});
-  };
-  setTimeout(()=>{go();
-    setTimeout(()=>{if(msg.paused&&!msg.ended)addEventListener('pointerdown',go,{once:true})},600);
-  },900);
+  vid.muted=false;if(!vidGain)vid.volume=CONFIG.videoVolume;vid.loop=true;vid.currentTime=0;
+  const tp=$('#tapPlay');
+  const go=()=>{tp.hidden=true;A();
+    msg.currentTime=0;msg.play().then(()=>{duck(true);animateWave(true)}).catch(()=>{tp.hidden=false});
+    vid.play().catch(()=>{vid.muted=true;vid.play().catch(()=>{})})};
+  tp.onclick=go;
+  setTimeout(()=>{go();setTimeout(()=>{if(!started)tp.hidden=false},1500)},900);
 }
+msg.addEventListener('playing',()=>{started=true;$('#tapPlay').hidden=true});
+[[msg,'assets/voice.mp3'],[vid,'assets/video.mp4']].forEach(([el,p])=>el.addEventListener('error',()=>{$('#dbg').textContent='مشكلة بالملف: '+p}));
 msg.addEventListener('timeupdate',()=>{if(msg.duration)$('#prog').style.width=(msg.currentTime/msg.duration*100)+'%'});
 msg.onended=()=>{vid.pause();animateWave(false);duck(false);setTimeout(finale,1200)};
 
