@@ -3,6 +3,7 @@ const CONFIG={
   name:'أحمد عمر',          // ← اكتب الاسم
   sub:'كل عام وإنت أحلى وأغلى إشي',
   audioSpeed:1.1,
+  voiceGain:1.2,               // تكبير صوت التسجيل (1 = عادي)
   videoVolume:.12,             // صوت الفيديو الأصلي (0 - 1)              // سرعة الصوت (1 = عادي، 1.1 = أسرع شوي)
   endTitle:'كل عام وإنت بخير',
   endText:'الله يخليك إلنا، ويجعل سنتك الجاية كلها فرح وإنجازات. حبينا نفاجئك لأنك تستاهل كل خير.'
@@ -69,7 +70,7 @@ function frame(t){
 requestAnimationFrame(frame);
 
 /* ---------- Flow ---------- */
-$('#start').onclick=async()=>{A();try{navigator.audioSession.type='playback'}catch(e){}routeVideo();
+$('#start').onclick=async()=>{A();try{navigator.audioSession.type='playback'}catch(e){}routeVideo();loadVoice();
   [msg,song,vid].forEach(m=>{const was=m.muted;m.muted=true;m.play().then(()=>{m.pause();m.currentTime=0;m.muted=was}).catch(()=>{m.muted=was})});$('#mute').hidden=false;sfx.chime();show('count');
   for(const n of [3,2,1]){const el=$('#num');el.textContent=n;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');sfx.tick();await wait(600)}
   hero()};
@@ -100,6 +101,20 @@ for(let i=0;i<32;i++)wave.appendChild(document.createElement('i'));
 function animateWave(on){clearInterval(waveT);const b=[...wave.children];
   if(!on){b.forEach(x=>x.style.height='8px');return}
   waveT=setInterval(()=>b.forEach((x,i)=>x.style.height=(8+Math.abs(Math.sin(Date.now()/180+i*.5))*Math.random()*46)+'px'),120)}
+/* voice via WebAudio (reliable on iPhone); falls back to <audio> if unavailable */
+let vbuf=null,vsrc=null,vT0=0;
+function loadVoice(){if(!/^https?:/.test(location.protocol))return;
+  fetch(msg.getAttribute('src')).then(r=>r.arrayBuffer()).then(ab=>new Promise((ok,no)=>A().decodeAudioData(ab,ok,no))).then(b=>{vbuf=b}).catch(()=>{vbuf=null})}
+function stopVoice(){if(vsrc){const s=vsrc;vsrc=null;try{s.stop()}catch(e){}}}
+function voiceDone(){vid.pause();animateWave(false);duck(false);setTimeout(finale,1200)}
+function playVoice(){
+  if(!vbuf)return false;
+  try{A();stopVoice();const s=ac.createBufferSource(),g=ac.createGain();
+    s.buffer=vbuf;s.playbackRate.value=CONFIG.audioSpeed;g.gain.value=CONFIG.voiceGain;s.connect(g).connect(master);
+    s.onended=()=>{if(vsrc===s){vsrc=null;voiceDone()}};vsrc=s;vT0=ac.currentTime;s.start();
+    started=true;$('#tapPlay').hidden=true;duck(true);animateWave(true);
+    const tick=setInterval(()=>{if(vsrc!==s){clearInterval(tick);return}$('#prog').style.width=Math.min(100,(ac.currentTime-vT0)*CONFIG.audioSpeed/vbuf.duration*100)+'%'},200);
+    return true}catch(e){return false}}
 let started=false,vidGain;
 function routeVideo(){ // volume control that also works on iPhone (only on http/https)
   if(vidGain||!/^https?:/.test(location.protocol))return;
@@ -110,7 +125,7 @@ function gallery(){
   vid.muted=false;if(!vidGain)vid.volume=CONFIG.videoVolume;vid.loop=true;vid.currentTime=0;
   const tp=$('#tapPlay');
   const go=()=>{tp.hidden=true;A();
-    msg.currentTime=0;msg.play().then(()=>{duck(true);animateWave(true)}).catch(()=>{tp.hidden=false});
+    if(!playVoice()){msg.currentTime=0;msg.play().then(()=>{duck(true);animateWave(true)}).catch(()=>{tp.hidden=false})}
     vid.play().catch(()=>{vid.muted=true;vid.play().catch(()=>{})})};
   tp.onclick=go;
   setTimeout(()=>{go();setTimeout(()=>{if(!started)tp.hidden=false},1500)},900);
@@ -118,9 +133,9 @@ function gallery(){
 msg.addEventListener('playing',()=>{started=true;$('#tapPlay').hidden=true});
 [[msg,'assets/voice.mp3'],[vid,'assets/video.mp4']].forEach(([el,p])=>el.addEventListener('error',()=>{$('#dbg').textContent='مشكلة بالملف: '+p}));
 msg.addEventListener('timeupdate',()=>{if(msg.duration)$('#prog').style.width=(msg.currentTime/msg.duration*100)+'%'});
-msg.onended=()=>{vid.pause();animateWave(false);duck(false);setTimeout(finale,1200)};
+msg.onended=voiceDone;
 
 function finale(){
   show('end');$('#endTitle').textContent=CONFIG.endTitle;$('#endText').textContent=CONFIG.endText;
   sfx.chime();confetti(200);fireworks=true}
-$('#replay').onclick=()=>{fireworks=false;rockets=[];clearInterval(loopT);song.pause();song.currentTime=0;msg.pause();vid.pause();$('#hero').classList.remove('go');$('#sub').classList.remove('on');$('#start').click()};
+$('#replay').onclick=()=>{fireworks=false;rockets=[];clearInterval(loopT);song.pause();song.currentTime=0;msg.pause();stopVoice();vid.pause();$('#hero').classList.remove('go');$('#sub').classList.remove('on');$('#start').click()};
